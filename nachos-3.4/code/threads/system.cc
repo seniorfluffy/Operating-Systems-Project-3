@@ -1,7 +1,7 @@
 // system.cc 
 //	Nachos initialization and cleanup routines.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -18,19 +18,19 @@ Interrupt *interrupt;			// interrupt status
 Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
-//< edited by Avery Cox
-int someFlag;
-//>
+int threadChoice;
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
 
-#ifdef FILESYS
-SynchDisk   *synchDisk;
+#ifdef USER_PROGRAM
+Machine *machine;	// user program memory and registers
+List* activeThreads;
+int threadID;
 #endif
 
-#ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
-Machine *machine;	// user program memory and registers
+#ifdef FILESYS
+SynchDisk   *synchDisk;
 #endif
 
 #ifdef NETWORK
@@ -109,12 +109,13 @@ Initialize(int argc, char **argv)
 						// number generator
 	    randomYield = TRUE;
 	    argCount = 2;
-	}
-	//< edited by Avery Cox
-	else if (!strcmp(*argv, "-A")) {	
-            someFlag = (atoi(*(argv+1)));
-	}
-	//>
+	} else if (!strcmp(*argv, "-A")) {
+	    if(*(argv+1) == NULL)
+			threadChoice = -1;
+	    else
+			threadChoice = atoi(*(argv+1));
+	    argCount = 2;
+	} 
 #ifdef USER_PROGRAM
 	if (!strcmp(*argv, "-s"))
 	    debugUserProg = TRUE;
@@ -133,7 +134,6 @@ Initialize(int argc, char **argv)
 	    netname = atoi(*(argv + 1));
 	    argCount = 2;
 	}
-	
 #endif
     }
 
@@ -145,6 +145,8 @@ Initialize(int argc, char **argv)
 	timer = new Timer(TimerInterruptHandler, 0, randomYield);
 
     threadToBeDestroyed = NULL;
+	
+	
 
     // We didn't explicitly allocate the current thread we are running in.
     // But if it ever tries to give up the CPU, we better have a Thread
@@ -154,11 +156,14 @@ Initialize(int argc, char **argv)
 
     interrupt->Enable();
     CallOnUserAbort(Cleanup);			// if user hits ctl-C
-    
+	
 #ifdef USER_PROGRAM
-    machine = new Machine(debugUserProg);	// this must come first
-#endif
+	machine = new Machine(debugUserProg);
 
+
+	activeThreads = new List();	// Make the active threads list.
+	threadID = 1; // Initialize our total number of active threads.
+#endif
 #ifdef FILESYS
     synchDisk = new SynchDisk("DISK");
 #endif
@@ -186,6 +191,7 @@ Cleanup()
     
 #ifdef USER_PROGRAM
     delete machine;
+	delete activeThreads;
 #endif
 
 #ifdef FILESYS_NEEDED

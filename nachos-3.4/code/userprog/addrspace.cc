@@ -63,7 +63,7 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
-    printf("Butt");
+    printf("begin");
     NoffHeader noffH;
     unsigned int i, size;
 
@@ -71,7 +71,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
-   printf("BUTTS");
+   printf("Middle");
    if(noffH.noffMagic == NOFFMAGIC){
    		printf("NoffMagic Error");
    }

@@ -21,6 +21,7 @@
 #include "noff.h"
 #ifdef HOST_SPARC
 #include <strings.h>
+
 #endif
 
 //----------------------------------------------------------------------
@@ -62,6 +63,7 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
+    printf("Butt");
     NoffHeader noffH;
     unsigned int i, size;
 
@@ -69,8 +71,10 @@ AddrSpace::AddrSpace(OpenFile *executable)
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
-    ASSERT(noffH.noffMagic == NOFFMAGIC);
-
+   printf("BUTTS");
+   if(noffH.noffMagic == NOFFMAGIC){
+   		printf("NoffMagic Error");
+   }
 // how big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
@@ -78,10 +82,13 @@ AddrSpace::AddrSpace(OpenFile *executable)
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
 
-    ASSERT(numPages <= NumPhysPages);		// check we're not trying
+    if(numPages <= NumPhysPages){
+    	printf("Phys pages > than numPages");
+    }		// check we're not trying
 						// to run anything too big --
 						// at least until we have
 						// virtual memory
+
 
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);

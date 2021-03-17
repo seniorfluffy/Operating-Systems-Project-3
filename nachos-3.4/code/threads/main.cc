@@ -92,11 +92,13 @@ main(int argc, char **argv)
         if (!strcmp(*argv, "-z"))               // print copyright
             printf (copyright);
 #ifdef USER_PROGRAM
+	printf("Adder Complete");
         if (!strcmp(*argv, "-x")) {        	// run a user program
-	    ASSERT(argc > 1);
-            StartProcess(*(argv + 1));
-		printf("I'm here");
-            argCount = 2;
+	    if(argc > 1){
+            	StartProcess(*(argv + 1));
+		printf("\nI'm here\n");
+            	argCount = 2;
+	    }else{}
         } else if (!strcmp(*argv, "-c")) {      // test the console
 	    if (argc == 1)
 	        ConsoleTest(NULL, NULL);

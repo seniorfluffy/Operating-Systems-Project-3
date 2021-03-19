@@ -52,6 +52,7 @@
 
 #include "utility.h"
 #include "system.h"
+#include "bitmap.h"
 
 // External functions used by this file
 
@@ -74,13 +75,14 @@ extern void MailTest(int networkID);
 //		ex: "nachos -d +" -> argv = {"nachos", "-d", "+"}
 //----------------------------------------------------------------------
 
-int
+
+
 main(int argc, char **argv)
 {
     int argCount;			// the number of arguments 
 					// for a particular command
 
-    DEBUG('t', "Entering main");
+    DEBUG('t', "Entering main\n");
     (void) Initialize(argc, argv);
     
 #ifdef THREADS
@@ -92,13 +94,14 @@ main(int argc, char **argv)
         if (!strcmp(*argv, "-z"))               // print copyright
             printf (copyright);
 #ifdef USER_PROGRAM
-	printf("Adder Complete");
+	
         if (!strcmp(*argv, "-x")) {        	// run a user program
+		
 	    if(argc > 1){
             	StartProcess(*(argv + 1));
 		printf("\nI'm here\n");
             	argCount = 2;
-	    }else{}
+	    }
         } else if (!strcmp(*argv, "-c")) {      // test the console
 	    if (argc == 1)
 	        ConsoleTest(NULL, NULL);

@@ -21,7 +21,8 @@
 #include "noff.h"
 #ifdef HOST_SPARC
 #include <strings.h>
-
+#include "bitmap.h"
+#include "syscall.h"
 #endif
 
 //----------------------------------------------------------------------
@@ -61,29 +62,38 @@ SwapHeader (NoffHeader *noffH)
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
 
+
+BitMap *Map = new BitMap(NumPhysPages);
+int* BeingUsed; 
+
 AddrSpace::AddrSpace(OpenFile *executable)
 {
-    printf("begin");
+   // printf("begin");
     NoffHeader noffH;
-    unsigned int i, size;
-
+    unsigned int i;
+    unsigned long size;
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
-   printf("Middle");
+   
    if(noffH.noffMagic == NOFFMAGIC){
-   		printf("NoffMagic Error");
+   		printf("\nNoffMagic Error\n");
    }
 // how big is address space?
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
-			+ UserStackSize;	// we need to increase the size
+    printf("%i %i %i %i", noffH.code.size, noffH.initData.size , noffH.uninitData.size , UserStackSize);
+    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize;	
+						// we need to increase the size
 						// to leave room for the stack
+    printf("\nsize : %i \n", size);
+	
     numPages = divRoundUp(size, PageSize);
+    printf("\nnumPage: %i, size %i, PageSize %i, NumPhysPages: %i \n", numPages, size, PageSize, NumPhysPages);
     size = numPages * PageSize;
+    printf("\nnumPage: %i, size %i, PageSize %i, NumPhysPages: %i \n", numPages, size, PageSize, NumPhysPages);
 
     if(numPages <= NumPhysPages){
-    	printf("Phys pages > than numPages");
+    	printf("\nPhys pages > than numPages\n");
     }		// check we're not trying
 						// to run anything too big --
 						// at least until we have
@@ -93,21 +103,43 @@ AddrSpace::AddrSpace(OpenFile *executable)
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
 // first, set up the translation 
-    pageTable = new TranslationEntry[numPages];
+
+    pageTable = new TranslationEntry[numPages+1];
+	BeingUsed = new int[numPages];
+	
     for (i = 0; i < numPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
+		int open = Map->Find();
+		BeingUsed[i] = open;
+	    Map->Mark(open);
+		
+		if(open == -1){
+		   printf("ERROR TOO MUCH MEMORY USED BY PROCESS");
+		   for(int i = 0; i<numPages; i++){
+                  Map->Clear(BeingUsed[i]);
+           
+          delete pageTable;
+           break; 
+           }
+         }
+           
+        pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
+        pageTable[open].physicalPage = i;
+    	pageTable[i].valid = TRUE;
+	    pageTable[i].use = FALSE;
+	    pageTable[i].dirty = FALSE;
+	    pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
 					// a separate page, we could set its 
 					// pages to be read-only
+        
+      
     }
-    
+    Map->Print();
+  
+    //DEBUG('a', "finished page table\n");
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment
     bzero(machine->mainMemory, size);
+   
 
 // then, copy in the code and data segments into memory
     if (noffH.code.size > 0) {
@@ -122,7 +154,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
         executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
 			noffH.initData.size, noffH.initData.inFileAddr);
     }
-
+   
 }
 
 //----------------------------------------------------------------------
@@ -132,6 +164,10 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
+   for(int i = 0; i<numPages; i++){
+        Map->Clear(BeingUsed[i]);
+   }
+   Map->Print();
    delete pageTable;
 }
 

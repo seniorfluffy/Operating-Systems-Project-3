@@ -7,5 +7,5 @@ int main() {
 	for(i<0; i<loops; i++){
 		x = x +1;
 	}
-	Write("Adder Complete", 20, ConsoleOutput);
+	Write("Adder Complete \n ", 20, ConsoleOutput);
 }

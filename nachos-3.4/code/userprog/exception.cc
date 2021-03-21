@@ -243,16 +243,18 @@ ExceptionHandler(ExceptionType which)
 			}
 			case SC_Exit :	// Exit a process.
 			{
+			    
 				printf("SYSTEM CALL: Exit, called by thread %i.\n",currentThread->getID());
 				if(arg1 == 0)	// Did we exit properly?  If not, show an error message.
 					printf("Process %i exited normally!\n", currentThread->getID());
 				else
-					printf("ERROR: Process %i exited abnormally!\n", currentThread->getID());
+					printf("ERROR: Process %i exited abnormally!\n", currentThread->getID());           
 				
+				 machine->Print();
 				if(currentThread->space)	// Delete the used memory from the process.
 					delete currentThread->space;
 				currentThread->Finish();	// Delete the thread.
-
+               
 				break;
 			}
            case SC_Yield :	// Yield to a new process.

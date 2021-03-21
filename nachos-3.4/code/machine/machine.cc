@@ -211,4 +211,20 @@ void Machine::WriteRegister(int num, int value)
 	// DEBUG('m', "WriteRegister %d, value %d\n", num, value);
 	registers[num] = value;
     }
+void Machine::Print(){
+    printf("Memory:\n");
+    for(int pg = 0; pg< NumPhysPages; pg++){
+      
+        int j = 0;
+        for(int x = 0; x< PageSize; x++){
+            
+            j = j + mainMemory[pg*PageSize +x]; 
+        }
+       // if(j != 0){
+            printf("Page : %i sum = %d\n", pg,j);
+    //}
+}
+
+
+}
 

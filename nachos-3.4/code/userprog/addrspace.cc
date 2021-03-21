@@ -70,27 +70,28 @@ AddrSpace::AddrSpace(OpenFile *executable)
 {
    // printf("begin");
     NoffHeader noffH;
-    unsigned int i;
-    unsigned long size;
+    unsigned int i, size;
+	printf("AdderSpace Initialized");
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
    
-   if(noffH.noffMagic == NOFFMAGIC){
+   if(noffH.noffMagic != NOFFMAGIC){
    		printf("\nNoffMagic Error\n");
    }
-// how big is address space?
-    printf("%i %i %i %i", noffH.code.size, noffH.initData.size , noffH.uninitData.size , UserStackSize);
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize;	
-						// we need to increase the size
+   printf("finished Executed Noff stuff\n");
+   
+   size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
+			+ UserStackSize;	// we need to increase the size
 						// to leave room for the stack
-    printf("\nsize : %i \n", size);
-	
     numPages = divRoundUp(size, PageSize);
-    printf("\nnumPage: %i, size %i, PageSize %i, NumPhysPages: %i \n", numPages, size, PageSize, NumPhysPages);
     size = numPages * PageSize;
-    printf("\nnumPage: %i, size %i, PageSize %i, NumPhysPages: %i \n", numPages, size, PageSize, NumPhysPages);
+    printf("size: %i, numPages %i, PageSize: %i, NumPhysPages %i,", size, numPages, PageSize, NumPhysPages);
+    //ASSERT(numPages <= NumPhysPages);		// check we're not trying
+						// to run anything too big --
+						// at least until we have
+						// virtual memory
 
     if(numPages <= NumPhysPages){
     	printf("\nPhys pages > than numPages\n");
@@ -138,22 +139,29 @@ AddrSpace::AddrSpace(OpenFile *executable)
     //DEBUG('a', "finished page table\n");
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment
-    bzero(machine->mainMemory, size);
+    //machine->Print();
+    //printf("Before Bzero\n");
+    //bzero(machine->mainMemory, size);
+    //printf("After Bzero\n");
    
 
 // then, copy in the code and data segments into memory
+    machine->Print();
+    printf("/n Being used : %i\n", BeingUsed[0]);
+    printf("\n NOFF Variables :%i %i %i\n", noffH.code.size+(BeingUsed[0] *PageSize), noffH.code.inFileAddr+(BeingUsed[0] *PageSize), BeingUsed[0] *PageSize);
     if (noffH.code.size > 0) {
         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
 			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
-			noffH.code.size, noffH.code.inFileAddr);
+        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr+BeingUsed[0] *PageSize]),
+			noffH.code.size+ (BeingUsed[0] *PageSize), noffH.code.inFileAddr);
     }
     if (noffH.initData.size > 0) {
         DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
 			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
+        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr+BeingUsed[0]*PageSize]),
+			noffH.initData.size+ (BeingUsed[0] *PageSize), noffH.initData.inFileAddr);
     }
+    printf("end of AddrPsace Init");
    
 }
 
@@ -184,6 +192,7 @@ AddrSpace::~AddrSpace()
 void
 AddrSpace::InitRegisters()
 {
+    
     int i;
 
     for (i = 0; i < NumTotalRegs; i++)

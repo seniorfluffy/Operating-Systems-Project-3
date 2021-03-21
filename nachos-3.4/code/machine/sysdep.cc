@@ -223,9 +223,7 @@ void
 Lseek(int fd, int offset, int whence)
 {
     int retVal = lseek(fd, offset, whence);
-    if (retVal >= 0){
-	printf("\nLseek error (No clue what this is)\n");
-	};
+    ASSERT(retVal >= 0);
 }
 
 //----------------------------------------------------------------------

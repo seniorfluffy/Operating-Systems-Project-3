@@ -64,14 +64,14 @@ SwapHeader (NoffHeader *noffH)
 
 
 BitMap *Map = new BitMap(NumPhysPages);
-int* BeingUsed; 
+
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
    // printf("begin");
     NoffHeader noffH;
     unsigned int i, size;
-	printf("AdderSpace Initialized");
+	
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
@@ -80,7 +80,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
    if(noffH.noffMagic != NOFFMAGIC){
    		printf("\nNoffMagic Error\n");
    }
-   printf("finished Executed Noff stuff\n");
+   
    
    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
@@ -122,9 +122,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
            break; 
            }
          }
-           
+      
         pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-        pageTable[open].physicalPage = i;
+        pageTable[i].physicalPage = open;
     	pageTable[i].valid = TRUE;
 	    pageTable[i].use = FALSE;
 	    pageTable[i].dirty = FALSE;
@@ -146,9 +146,8 @@ AddrSpace::AddrSpace(OpenFile *executable)
    
 
 // then, copy in the code and data segments into memory
-    machine->Print();
-    printf("/n Being used : %i\n", BeingUsed[0]);
-    printf("\n NOFF Variables :%i %i %i\n", noffH.code.size+(BeingUsed[0] *PageSize), noffH.code.inFileAddr+(BeingUsed[0] *PageSize), BeingUsed[0] *PageSize);
+    //machine->Print();
+    
     if (noffH.code.size > 0) {
         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
 			noffH.code.virtualAddr, noffH.code.size);
@@ -172,9 +171,11 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
-   for(int i = 0; i<numPages; i++){
+   for(int i = 0; i<sizeof(BeingUsed[i])+2; i++){
+        printf(" clearing %i ", BeingUsed[i]);
         Map->Clear(BeingUsed[i]);
    }
+   machine->Print();
    Map->Print();
    delete pageTable;
 }

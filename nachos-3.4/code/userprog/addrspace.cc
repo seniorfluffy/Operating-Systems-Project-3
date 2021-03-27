@@ -125,7 +125,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
       
         pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
         pageTable[i].physicalPage = open;
-    	pageTable[i].valid = TRUE;
+    	pageTable[i].valid = FALSE;
 	    pageTable[i].use = FALSE;
 	    pageTable[i].dirty = FALSE;
 	    pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 

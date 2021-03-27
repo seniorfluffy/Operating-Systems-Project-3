@@ -324,6 +324,18 @@ ExceptionHandler(ExceptionType which)
 			delete currentThread->space;
 		currentThread->Finish();	// Delete the thread.
 		break;
+			
+		
+		case PageFaultException :
+		{
+			printf("Debugging: made it to start PageFaultException case");
+		// get virtual address that caused page fault
+		int badVAddr = machine->ReadRegister(BadVAddrReg);
+		// use of method because pageTable and Map are varriables of addrspace class
+		currentThread->space->loadPage(badVAddr);
+			printf("Debugging: made it to  end PageFaultException case");
+		break;
+		}	
 
 		default :
 		//      printf("Unexpected user mode exception %d %d\n", which, type);

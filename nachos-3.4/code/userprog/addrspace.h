@@ -42,6 +42,7 @@ class AddrSpace {
 					// address space
 	
 	   // exe to load page
+	// work on reading 
       OpenFile *exe;
 };
 

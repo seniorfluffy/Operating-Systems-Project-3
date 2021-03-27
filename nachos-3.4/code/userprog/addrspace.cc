@@ -147,7 +147,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 // then, copy in the code and data segments into memory
     //machine->Print();
-    
+	
+	// comment out code below to stop loading 
+    /*
     if (noffH.code.size > 0) {
         DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
 			noffH.code.virtualAddr, noffH.code.size);
@@ -161,7 +163,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 			noffH.initData.size+ (BeingUsed[0] *PageSize), noffH.initData.inFileAddr);
     }
     printf("end of AddrPsace Init");
-   
+   */
 }
 
 //----------------------------------------------------------------------
@@ -237,3 +239,32 @@ void AddrSpace::RestoreState()
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
 }
+
+void AddrSpace::loadPage(int VirtualAddr){
+
+	 printf("Debugging: made it to start loadPage method");
+	 // increase page fault stats
+	 	stats->numPageFaults++;
+
+		//calculate virtual page
+		int VPage = VirtualAddr/PageSize;
+
+		// find open page in with bitmap
+		int openPage = Map->Find();
+
+		if(openPage == -1){
+			printf("No free pages found");
+			// add code to terminate nachos
+		}else {
+			//set pagetable entry valid bit to TRUE
+			pageTable[VPage].valid = TRUE;
+
+			// set pagetab;e emtry to open page
+			pageTable[VPage].physicalPage = openPage;
+
+			// load page into MEMORY
+
+			exe->ReadAt(&(machine->mainMemory[openPage*PageSize]),PageSize, VPage*PageSize);
+		}
+		printf("Debugging: made it to end loadPage method");
+ 		}

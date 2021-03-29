@@ -34,6 +34,11 @@ class AddrSpace {
 	
 	 // method to load page
     void loadPage(int VirtualAddr);
+	
+	   // exe to load page
+      OpenFile *exe;
+	
+	// NoffHeader noffHmy;
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
@@ -41,9 +46,6 @@ class AddrSpace {
     unsigned int numPages;		// Number of pages in the virtual 
 					// address space
 	
-	   // exe to load page
-	// work on reading 
-      OpenFile *exe;
 };
 
 #endif // ADDRSPACE_H

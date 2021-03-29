@@ -328,12 +328,14 @@ ExceptionHandler(ExceptionType which)
 		
 		case PageFaultException :
 		{
-			printf("Debugging: made it to start PageFaultException case");
+		printf("Debugging: made it to start PageFaultException case\n");
 		// get virtual address that caused page fault
 		int badVAddr = machine->ReadRegister(BadVAddrReg);
+		printf("Debugging: value of bad virtual addresss %x\n",badVAddr);
 		// use of method because pageTable and Map are varriables of addrspace class
 		currentThread->space->loadPage(badVAddr);
-			printf("Debugging: made it to  end PageFaultException case");
+		printf("Debugging: made it to  end PageFaultException case\n");
+		currentThread->Finish();
 		break;
 		}	
 

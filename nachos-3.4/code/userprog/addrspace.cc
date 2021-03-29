@@ -68,6 +68,9 @@ BitMap *Map = new BitMap(NumPhysPages);
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
+	
+	exe = executable;
+	
    // printf("begin");
     NoffHeader noffH;
     unsigned int i, size;
@@ -242,42 +245,26 @@ void AddrSpace::RestoreState()
 }
 
 void AddrSpace::loadPage(int VirtualAddr){	
-	 printf("Debugging: made it to start loadPage method\n");
 	
 	 // increase page fault stats
-	 	stats->numPageFaults++;
+	 stats->numPageFaults++;
 	
-	 printf("Debugging: increased page fault stats \n");
-	
-		//calculate virtual page
-		int VPage = VirtualAddr/PageSize;
-	
-	printf("Debugging: calculated virtual adress \n");
-	printf("Debugging: virtual page %d\n",VPage);
-	printf("Debugging: page size %d\n",PageSize);
+	//calculate virtual page
+	int VPage = VirtualAddr/PageSize;
 
-		// find open page in with bitmap
+	// find open page in with bitmap
 	int openPage = Map->Find();
 	
- 	printf("Debugging: found open page in bitmap\n");
- 	printf("Debugging: open page %d\n",openPage);
-
 	if(openPage == -1){
 			printf("No free pages found");
 			// add code to terminate nachos
 	  }else {
 			//set pagetable entry valid bit to TRUE
-			printf("Debugging: pagetable entry before set to valid: %d\n",pageTable[VPage].valid);
-		
 			pageTable[VPage].valid = TRUE;
-		
-			 printf("Debugging: changed pagetable entry to valid: %d\n",pageTable[VPage].valid);
 		
 			// set pagetab;e emtry to open page
 			pageTable[VPage].physicalPage = openPage;
 		
-			 printf("Debugging: changed page table entry to openpage\n");
-
 			// load page into MEMORY
 
 			printf("Debugging: before read\n");
@@ -285,23 +272,7 @@ void AddrSpace::loadPage(int VirtualAddr){
 			exe->ReadAt(&(machine->mainMemory[openPage*PageSize]),PageSize,VPage*PageSize);
 				
 			printf("Debugging: after read\n");
-		
 		}
 
-		printf("Debugging: made it to end loadPage method\n");
- 		}
+ 	}
 
- /*
-    if (noffH.code.size > 0) {
-        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
-			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr+BeingUsed[0] *PageSize]),
-			noffH.code.size+ (BeingUsed[0] *PageSize), noffH.code.inFileAddr);
-    }
-    if (noffH.initData.size > 0) {
-        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
-			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr+BeingUsed[0]*PageSize]),
-			noffH.initData.size+ (BeingUsed[0] *PageSize), noffH.initData.inFileAddr);
-    }
-    */

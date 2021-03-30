@@ -114,8 +114,6 @@ AddrSpace::AddrSpace(OpenFile *executable, int threadId)
 					// a separate page, we could set its 
 					// pages to be read-only
     }
-
-     Map->Print();
     
     // write code for SwapFile
     //create a buffer of size 
@@ -144,7 +142,6 @@ AddrSpace::AddrSpace(OpenFile *executable, int threadId)
 AddrSpace::~AddrSpace()
 {
    machine->Print();
-   Map->Print();
    delete pageTable;
 }
 

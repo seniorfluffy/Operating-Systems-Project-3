@@ -63,10 +63,8 @@ SwapHeader (NoffHeader *noffH)
 //----------------------------------------------------------------------
 
 
-BitMap *Map = new BitMap(NumPhysPages);
-
-
-AddrSpace::AddrSpace(OpenFile *executable)
+// removed code for Task 1
+AddrSpace::AddrSpace(OpenFile *executable, int threadId)
 {
    // printf("begin");
     NoffHeader noffH;
@@ -105,62 +103,36 @@ AddrSpace::AddrSpace(OpenFile *executable)
 					numPages, size);
 // first, set up the translation 
 
-    pageTable = new TranslationEntry[numPages+1];
-	BeingUsed = new int[numPages];
-	
+   	pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
-		int open = Map->Find();
-		BeingUsed[i] = open;
-	    Map->Mark(open);
-		
-		if(open == -1){
-		   printf("ERROR TOO MUCH MEMORY USED BY PROCESS");
-		   for(int i = 0; i<numPages; i++){
-                  Map->Clear(BeingUsed[i]);
-           
-          delete pageTable;
-           break; 
-           }
-         }
-      
         pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-        pageTable[i].physicalPage = open;
-    	pageTable[i].valid = TRUE;
+       // pageTable[i].physicalPage = open;
+    	pageTable[i].valid = FALSE;
 	    pageTable[i].use = FALSE;
 	    pageTable[i].dirty = FALSE;
 	    pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
 					// a separate page, we could set its 
 					// pages to be read-only
-        
-      
     }
-    Map->Print();
-  
-    //DEBUG('a', "finished page table\n");
-// zero out the entire address space, to zero the unitialized data segment 
-// and the stack segment
-    //machine->Print();
-    //printf("Before Bzero\n");
-    //bzero(machine->mainMemory, size);
-    //printf("After Bzero\n");
-   
 
-// then, copy in the code and data segments into memory
-    //machine->Print();
+     Map->Print();
     
-    if (noffH.code.size > 0) {
-        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
-			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr+BeingUsed[0] *PageSize]),
-			noffH.code.size+ (BeingUsed[0] *PageSize), noffH.code.inFileAddr);
-    }
-    if (noffH.initData.size > 0) {
-        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
-			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr+BeingUsed[0]*PageSize]),
-			noffH.initData.size+ (BeingUsed[0] *PageSize), noffH.initData.inFileAddr);
-    }
-    printf("end of AddrPsace Init");
+    // write code for SwapFile
+    //create a buffer of size 
+    char* buffer = new char[noffH.code.size + noffH.initData.size + noffH.uninitData.size];
+    sFileName = new char[20];
+    // check line below asap
+    sprintf(sFileName, "%d.swap", threadId);
+    printf("swapFileName:%s",sFileName);
+
+    executable->ReadAt(buffer,noffH.code.size + noffH.initData.size + noffH.uninitData.size,sizeof(noffH));
+    fileSystem->Create(sFileName, noffH.code.size + noffH.initData.size + noffH.uninitData.size);
+    OpenFile *sFilePointer = fileSystem->Open(sFileName);
+    sFilePointer->WriteAt(buffer,noffH.code.size + noffH.initData.size + noffH.uninitData.size,0);
+
+    delete sFilePointer;
+    delete buffer;
+    
    
 }
 
@@ -171,10 +143,6 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
-   for(int i = 0; i<sizeof(BeingUsed[i])+2; i++){
-        printf(" clearing %i ", BeingUsed[i]);
-        Map->Clear(BeingUsed[i]);
-   }
    machine->Print();
    Map->Print();
    delete pageTable;

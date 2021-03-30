@@ -337,6 +337,7 @@ ExceptionHandler(ExceptionType which)
 		if(openPage == -1){
 			printf("No Free page Available");
 			//exit(0) to end nachos
+			Exit(0);
 		}else{
 			currentThread->space->pageTable[VPage].physicalPage = openPage;
 			currentThread->space->pageTable[VPage].valid = TRUE;

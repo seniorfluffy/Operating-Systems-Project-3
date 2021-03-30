@@ -329,7 +329,7 @@ ExceptionHandler(ExceptionType which)
 			// added page fault exception
 	case PageFaultException :
 	{
-		int openPage = Map -> Find();
+		int openPage = Map->Find();
 		int badVAddr = machine->ReadRegister(BadVAddrReg);
 		int VPage = badVAddr/PageSize;
 

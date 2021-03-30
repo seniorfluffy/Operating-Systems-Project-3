@@ -21,7 +21,8 @@
 
 class AddrSpace {
   public:
-    AddrSpace(OpenFile *executable);	// Create an address space,
+	// changed constructor to include threadId
+    AddrSpace(OpenFile *executable, int threadId);	// Create an address space,
 					// initializing it with the program
 					// stored in the file "executable"
     ~AddrSpace();			// De-allocate an address space
@@ -31,9 +32,13 @@ class AddrSpace {
 
     void SaveState();			// Save/restore address space-specific
     void RestoreState();		// info on a context switch 
-
-  private:
-    TranslationEntry *pageTable;	// Assume linear page table translation
+	
+	// move pageTable to public for access 
+ TranslationEntry *pageTable;	// Assume linear page table translation
+  // add swap file name pointer
+	char * sFileName;
+	
+	private: 
 					// for now!
     unsigned int numPages;		// Number of pages in the virtual 
 					// address space

@@ -31,6 +31,7 @@ extern Interrupt *interrupt;			// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 extern int threadChoice;
+extern BitMap *Map;
 
 #ifdef USER_PROGRAM
 #include "machine.h"

@@ -325,19 +325,39 @@ ExceptionHandler(ExceptionType which)
 		currentThread->Finish();	// Delete the thread.
 		break;
 			
-		
-		case PageFaultException :
-		{
-		printf("Debugging: made it to start PageFaultException case\n");
-		// get virtual address that caused page fault
+	case PageFaultException :
+	{
+		int openPage = Map->Find();
 		int badVAddr = machine->ReadRegister(BadVAddrReg);
-		printf("Debugging: value of bad virtual addresss %x\n",badVAddr);
-		// use of method because pageTable and Map are varriables of addrspace class
-		currentThread->space->loadPage(badVAddr);
-		printf("Debugging: made it to  end PageFaultException case\n");
-		currentThread->Finish();
+		int VPage = badVAddr/PageSize;
+
+		stats->numPageFaults++;
+		if(openPage == -1){
+			printf("No Free page Available");
+			//exit(0) to end nachos
+			Exit(0);
+		}else{
+			currentThread->space->pageTable[VPage].physicalPage = openPage;
+			currentThread->space->pageTable[VPage].valid = TRUE;
+			
+			
+			//figure out how to get file name for task 3
+			// OpenFile *executable = fileSystem->Open(filename);
+			OpenFile *executable = fileSystem->Open("../test/mptest");
+			executable->ReadAt(&(machine->mainMemory[openPage*PageSize]), PageSize, VPage*PageSize + 40);
+			
+		/* code for task 4
+		OpenFile *executable = fileSystem->Open(currentThread->space->sFileName);
+		executable->ReadAt(&(machine->mainMemory[openPage*PageSize]), PageSize, VPage*PageSize);
+		*/
+		
+		// when swap file is implemented
+			// if(pageTable[VPage].dirty
+			// executable->WriteAt()
+		}
 		break;
-		}	
+	}		
+	
 
 		default :
 		//      printf("Unexpected user mode exception %d %d\n", which, type);

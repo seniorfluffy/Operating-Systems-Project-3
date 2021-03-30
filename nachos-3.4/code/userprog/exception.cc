@@ -193,7 +193,9 @@ ExceptionHandler(ExceptionType which)
 
 				// Calculate needed memory space
 				AddrSpace *space;
-				space = new AddrSpace(executable);
+			   
+			   	// added 0 arguement
+				space = new AddrSpace(executable,0);
 				delete executable;
 				// Do we have enough space?
 				if(!currentThread->killNewChild)	// If so...
@@ -324,6 +326,38 @@ ExceptionHandler(ExceptionType which)
 			delete currentThread->space;
 		currentThread->Finish();	// Delete the thread.
 		break;
+			// added page fault exception
+	case PageFaultException :
+	{
+		int openPage = Map -> Find();
+		int badVAddr = machine->ReadRegister(BadVAddrReg);
+		int VPage = badVAddr/PageSize;
+
+		stats->numPageFaults++;
+		if(openPage == -1){
+			printf("No Free page Available");
+			//exit(0) to end nachos
+		}else{
+			currentThread->space->pageTable[VPage].physicalPage = openPage;
+			currentThread->space->pageTable[VPage].valid = TRUE;
+
+
+			/* code for task 3
+			//figure out how to get file name for task 3
+			// OpenFile *executable = fileSystem->Open(filename);
+			OpenFile *executable = fileSystem->Open("../test/mptest");
+			executable->ReadAt(&(machine->mainMemory[freePhysicalPage*PageSize]), PageSize, badVirtualPage*PageSize + 40);
+			*/
+
+		OpenFile *executable = fileSystem->Open(currentThread->space->sFileName);
+		executable->ReadAt(&(machine->mainMemory[openPage*PageSize]), PageSize, VPage*PageSize);
+		
+		// when swap file is implemented
+			// if(pageTable[VPage].dirty
+			// executable->WriteAt()
+		}
+		break;
+	}		
 
 		default :
 		//      printf("Unexpected user mode exception %d %d\n", which, type);

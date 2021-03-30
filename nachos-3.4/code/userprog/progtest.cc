@@ -31,8 +31,8 @@ StartProcess(char *filename)
 	printf("Unable to open file %s\n", filename);
 	return;
     }
-	
-    space = new AddrSpace(executable);    
+	// added new arg 0 for constructor
+    space = new AddrSpace(executable,0);    
     currentThread->space = space;
 
     delete executable;			// close file
@@ -40,8 +40,11 @@ StartProcess(char *filename)
     space->InitRegisters();		// set the initial register values
     space->RestoreState();		// load page table register
 
-    machine->Run();			// jump to the user progam
-    ASSERT(FALSE);			// machine->Run never returns;
+    machine->Run();	
+	
+	// commet out ASSERT
+					// jump to the user progam
+   // ASSERT(FALSE);			// machine->Run never returns;
 					// the address space exits
 					// by doing the syscall "exit"
 }

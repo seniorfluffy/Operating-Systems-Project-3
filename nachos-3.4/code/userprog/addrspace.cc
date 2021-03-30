@@ -63,14 +63,10 @@ SwapHeader (NoffHeader *noffH)
 //----------------------------------------------------------------------
 
 
-BitMap *Map = new BitMap(NumPhysPages);
 
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
-	
-	exe = executable;
-	
    // printf("begin");
     NoffHeader noffH;
     unsigned int i, size;
@@ -108,25 +104,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
 					numPages, size);
 // first, set up the translation 
 
-    pageTable = new TranslationEntry[numPages+1];
-	// BeingUsed = new int[numPages];
+    pageTable = new TranslationEntry[numPages];
 	
-    for (i = 0; i < numPages; i++) {
-		/*int open = Map->Find();
-		BeingUsed[i] = open;
-	    Map->Mark(open);
-		
-		if(open == -1){
-		   printf("ERROR TOO MUCH MEMORY USED BY PROCESS");
-		   for(int i = 0; i<numPages; i++){
-                  Map->Clear(BeingUsed[i]);
-           
-          delete pageTable;
-           break; 
-           }
-	   
-         }*/
-      
+    for (i = 0; i < numPages; i++) {		
         pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
      //   pageTable[i].physicalPage = open;
     	pageTable[i].valid = FALSE;
@@ -134,40 +114,8 @@ AddrSpace::AddrSpace(OpenFile *executable)
 	    pageTable[i].dirty = FALSE;
 	    pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
 					// a separate page, we could set its 
-					// pages to be read-only
-        
-      
-    }
-    // Map->Print();
-  
-    //DEBUG('a', "finished page table\n");
-// zero out the entire address space, to zero the unitialized data segment 
-// and the stack segment
-    //machine->Print();
-    //printf("Before Bzero\n");
-    //bzero(machine->mainMemory, size);
-    //printf("After Bzero\n");
-   
+					// pages to be read-only   }
 
-// then, copy in the code and data segments into memory
-    //machine->Print();
-	
-	// comment out code below to stop loading 
-    /*
-    if (noffH.code.size > 0) {
-        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
-			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr+BeingUsed[0] *PageSize]),
-			noffH.code.size+ (BeingUsed[0] *PageSize), noffH.code.inFileAddr);
-    }
-    if (noffH.initData.size > 0) {
-        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
-			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr+BeingUsed[0]*PageSize]),
-			noffH.initData.size+ (BeingUsed[0] *PageSize), noffH.initData.inFileAddr);
-    }
-    printf("end of AddrPsace Init");
-   */
 }
 
 //----------------------------------------------------------------------
@@ -177,12 +125,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
-   for(int i = 0; i<sizeof(BeingUsed[i])+2; i++){
-        printf(" clearing %i ", BeingUsed[i]);
-        Map->Clear(BeingUsed[i]);
-   }
    machine->Print();
-   Map->Print();
    delete pageTable;
 }
 
@@ -244,35 +187,4 @@ void AddrSpace::RestoreState()
     machine->pageTableSize = numPages;
 }
 
-void AddrSpace::loadPage(int VirtualAddr){	
-	
-	 // increase page fault stats
-	 stats->numPageFaults++;
-	
-	//calculate virtual page
-	int VPage = VirtualAddr/PageSize;
-
-	// find open page in with bitmap
-	int openPage = Map->Find();
-	
-	if(openPage == -1){
-			printf("No free pages found");
-			// add code to terminate nachos
-	  }else {
-			//set pagetable entry valid bit to TRUE
-			pageTable[VPage].valid = TRUE;
-		
-			// set pagetab;e emtry to open page
-			pageTable[VPage].physicalPage = openPage;
-		
-			// load page into MEMORY
-
-			printf("Debugging: before read\n");
-		
-			exe->ReadAt(&(machine->mainMemory[openPage*PageSize]),PageSize,VPage*PageSize);
-				
-			printf("Debugging: after read\n");
-		}
-
- 	}
 

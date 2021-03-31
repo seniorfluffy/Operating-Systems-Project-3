@@ -9,7 +9,6 @@
 #include "system.h"
 #include "machine.h"
 
-
 // This defines *all* of the global data structures used by Nachos.
 // These are all initialized and de-allocated by this file.
 
@@ -20,7 +19,7 @@ Interrupt *interrupt;			// interrupt status
 Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
-BitMap *Map = new BitMap(NumPhysPages); 
+//BitMap *Map;
 
 int threadChoice;
 #ifdef FILESYS_NEEDED

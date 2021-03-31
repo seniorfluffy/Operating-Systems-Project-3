@@ -336,7 +336,7 @@ ExceptionHandler(ExceptionType which)
 		stats->numPageFaults++;
 		if(openPage == -1){
 			printf("No Free page Available");
-			//exit(0) to end nachos
+			Exit(0);
 		}else{
 			currentThread->space->pageTable[VPage].physicalPage = openPage;
 			currentThread->space->pageTable[VPage].valid = TRUE;
@@ -344,7 +344,7 @@ ExceptionHandler(ExceptionType which)
 
 			/* code for task 3
 			OpenFile *executable = fileSystem->Open(dpFileName);
-			executable->ReadAt(&(machine->mainMemory[freePhysicalPage*PageSize]), PageSize, badVirtualPage*PageSize + 40);
+			executable->ReadAt(&(machine->mainMemory[openPage*PageSize]), PageSize, VPage*PageSize + 40);
 			*/
 
 		OpenFile *executable = fileSystem->Open(currentThread->space->sFileName);

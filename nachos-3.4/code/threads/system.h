@@ -32,6 +32,7 @@ extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 extern int threadChoice;
 extern BitMap *Map;
+extern char *dpFileName;
 
 #ifdef USER_PROGRAM
 #include "machine.h"

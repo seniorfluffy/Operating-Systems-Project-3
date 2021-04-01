@@ -23,6 +23,9 @@
 void
 StartProcess(char *filename)
 {
+	
+	Map = new BitMap(NumPhysPages);
+	dpFileName = filename;
     OpenFile *executable = fileSystem->Open(filename);
 	
     AddrSpace *space;

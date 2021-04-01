@@ -19,7 +19,8 @@ Interrupt *interrupt;			// interrupt status
 Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
-BitMap *Map = new BitMap(NumPhysPages); 
+BitMap *Map; 
+char *dpFileName;
 
 int threadChoice;
 #ifdef FILESYS_NEEDED

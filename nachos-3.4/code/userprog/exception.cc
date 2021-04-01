@@ -343,7 +343,7 @@ ExceptionHandler(ExceptionType which)
 			
 			//figure out how to get file name for task 3
 			// OpenFile *executable = fileSystem->Open(filename);
-			OpenFile *executable = fileSystem->Open("../test/mptest");
+			OpenFile *executable = fileSystem->Open(dpFileName);
 			executable->ReadAt(&(machine->mainMemory[openPage*PageSize]), PageSize, VPage*PageSize + 40);
 			
 		/* code for task 4
